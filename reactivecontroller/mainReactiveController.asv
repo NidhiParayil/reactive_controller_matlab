@@ -1,0 +1,74 @@
+% Simulate, plot, and animate a puck bouncing between a wall and a moving
+% paddle. This is to illustrate hybrid simulation using event functions
+% Author:  Kevin Green 2021
+clear
+% Initial state conditions
+% X0 = [ 0.7 ... % position (m)
+%        0.0];   % velocity (m/s)
+
+
+% Simulation System Constants
+
+
+p.agent_mass = 1;
+p.agent_pos = [0,0];
+p.desired_vel = .5;
+p.ob_mass = 1;
+p.Kp_pos =1;
+p.agent_r = .5;
+p.obstacle_r = .9;
+p.amplitude = 6;
+p.phi = .3;
+p.frequency = .4;
+p.num_obstacles = 1
+% Paddle Trajectory Constants
+c.freq = .5; % frequency of paddle oscillation (rad/s)
+c.amp = 0.2; % Amplitude of paddle motion (m)
+
+% Bind the trajectory constants to paddle motion function
+
+
+Xagent=[-1,.5,0,0,0,0];
+Xobts= zeros(1,6*p.num_obstacles);% [-1,.5,0,0.,1,0,2,0,0,0,0,0];
+Xobts(1) = 1.5;
+Xobts(4)=1.5;
+X0 = [Xagent, Xobts];
+
+
+
+% Simulate the system
+[t_vec,X_vec,force] = reactiveControllerSim(X0,p,@(X,t)PositionController(X,p,t),@(X)ForceController(X,p));
+% 
+
+
+
+figure;
+subplot(3,1,1)
+plot(t_vec,X_vec(1,:),'g');
+plot(t_vec,X_vec(4,:),'b');
+plot(t_vec,X_vec(7,:),'r');
+plot(t_vec,X_vec(10,:),'g');
+xlim([0 10])
+ylim([-4 4])
+legend('pos')
+
+subplot(3,1,2)
+plot(t_vec,X_vec(2,:),'b');
+xlim([0 10])
+ylim([-4 4])
+legend('vel')
+
+subplot(3,1,3)
+plot(t_vec,X_vec(9,:),'r');
+xlim([0 10])
+ylim([-4 4])
+legend('acc')
+xlabel('Time (s)')
+ylabel('--(m)')
+
+%Animate the mass
+exportVideo = 1;
+playbackRate = 1;
+reactiveControllerAnimation(p,t_vec,X_vec,exportVideo,playbackRate);
+
+
